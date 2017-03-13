@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Steambot", "Steambot\Steambot.csproj", "{0E743F4C-20A0-44AB-95F5-BB15E4785C68}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7A93AF15-1112-46A4-91CB-8997BCC0248C}"
+	ProjectSection(SolutionItems) = preProject
+		greetings.txt = greetings.txt
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0E743F4C-20A0-44AB-95F5-BB15E4785C68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E743F4C-20A0-44AB-95F5-BB15E4785C68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E743F4C-20A0-44AB-95F5-BB15E4785C68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E743F4C-20A0-44AB-95F5-BB15E4785C68}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
