@@ -44,3 +44,6 @@ C:\Users\MaximilianAndersen\Documents\SteamBot-master\Steambot\Steambot\bin\Debu
 C:\Users\MaximilianAndersen\Documents\SteamBot-master\Steambot\Steambot\obj\Debug\Steambot.csprojResolveAssemblyReference.cache
 C:\Users\MaximilianAndersen\Documents\SteamBot-master\Steambot\Steambot\obj\Debug\Steambot.Properties.Resources.resources
 C:\Users\MaximilianAndersen\Documents\SteamBot-master\Steambot\Steambot\obj\Debug\Steambot.csproj.GenerateResource.Cache
+E:\Programming\Steambot\Steambot\Steambot\bin\Debug\Steambot.exe.config
+E:\Programming\Steambot\Steambot\Steambot\obj\Debug\Steambot.exe
+E:\Programming\Steambot\Steambot\Steambot\obj\Debug\Steambot.pdb
