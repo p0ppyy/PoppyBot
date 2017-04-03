@@ -25,16 +25,6 @@ namespace Steambot
 
         static String[] admins;
 
-
-
-
-
-
-
-
-
-
-
         static bool isRunning = false;
 
         static void Main(string[] args)
@@ -55,9 +45,7 @@ namespace Steambot
 
             manager = new CallbackManager(steamClient);
 
-            sr = new StreamReader("//intra.lund.se/studentdata/052314/Programmering/SteamBot-master/Steambot/Steambot/Resources/admins.txt");
-
-            admins = sr.ReadToEnd().Split();
+            admins = Properties.Resources.admins.Split();
 
             steamUser = steamClient.GetHandler<SteamUser>();
 
@@ -244,7 +232,15 @@ namespace Steambot
 
         static void OnMessageReceived(SteamFriends.FriendMsgCallback callback)
         {
-            Console.WriteLine(steamFriends.GetFriendPersonaName(callback.Sender) + ": " + callback.Message);
+            bool isAdmin;
+
+            for (int i = 0; i < admins.Length; i++) {
+                if (admins[i] == callback.Sender.ToString()) {
+                    Console.WriteLine("Admin");
+                }
+            }
+
+            Console.WriteLine(steamFriends.GetFriendPersonaName(callback.Sender)+ "," + callback.Sender + ": " + callback.Message);
             if (callback.Message.Length > 1) {
                 String[] message = callback.Message.Split();
 
