@@ -61,6 +61,15 @@ namespace Steambot.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string admins {
+            get {
+                return ResourceManager.GetString("admins", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hello sunshine!
         ///Howdy partner!
         ///Hey howdy hi!

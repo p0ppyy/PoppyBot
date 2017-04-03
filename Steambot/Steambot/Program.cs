@@ -15,23 +15,36 @@ namespace Steambot
         static string user, pass;
         static string authCode, twoFactorCode;
 
+        static StreamReader sr;
+
         static SteamClient steamClient;
         static CallbackManager manager;
 
         static SteamUser steamUser;
         static SteamFriends steamFriends;
 
+        static String[] admins;
+
+
+
+
+
+
+
+
+
+
+
         static bool isRunning = false;
 
         static void Main(string[] args)
         {
-            Console.WriteLine("CTRL+D quits");
+            //Console.WriteLine("CTRL+D quits");
 
-            Console.Write("Username: ");
-            user = Console.ReadLine();
 
-            Console.Write("Password: ");
-            pass = Console.ReadLine();
+            user = "poppiesbot";
+
+            pass = "brorerik99";
 
             loginSteam();
         }
@@ -41,6 +54,10 @@ namespace Steambot
             steamClient = new SteamClient();
 
             manager = new CallbackManager(steamClient);
+
+            sr = new StreamReader("//intra.lund.se/studentdata/052314/Programmering/SteamBot-master/Steambot/Steambot/Resources/admins.txt");
+
+            admins = sr.ReadToEnd().Split();
 
             steamUser = steamClient.GetHandler<SteamUser>();
 
@@ -148,7 +165,7 @@ namespace Steambot
 
         static void onPersonaState(SteamFriends.PersonaStateCallback callback) {
 
-            Console.WriteLine("State changed: {0}", callback.Name);
+            Console.WriteLine(callback.Name + " is now " + callback.State);
 
         }
 
@@ -168,14 +185,6 @@ namespace Steambot
             int friendCount = steamFriends.GetFriendCount();
 
             Console.WriteLine("You have {0} friends", friendCount);
-
-            for(int x = 0; x < friendCount; x++)
-            {
-                SteamID steamIDFriend = steamFriends.GetFriendByIndex(x);
-
-                Console.WriteLine("Friend: {0}", steamIDFriend.Render());
-
-            }
 
             foreach (var friend in callback.FriendList) {
                 if(friend.Relationship == EFriendRelationship.RequestRecipient)
@@ -235,21 +244,51 @@ namespace Steambot
 
         static void OnMessageReceived(SteamFriends.FriendMsgCallback callback)
         {
-            Random rand = new Random();
-            String[] message = callback.Message.Split();
+            Console.WriteLine(steamFriends.GetFriendPersonaName(callback.Sender) + ": " + callback.Message);
+            if (callback.Message.Length > 1) {
+                String[] message = callback.Message.Split();
 
-            if (message[0].ToLower() == "hej") { 
-                //IEnumerable<string> lines = File.ReadLines(Properties.Resources.greetings);
-                //int lineToRead = rand.Next(1, lines.Count());
-                //string gretting = lines.Skip(lineToRead - 1).First();
+                
 
-                steamFriends.SendChatMessage(callback.Sender, EChatEntryType.ChatMsg, "Hej");
+                if (message[0].Substring(0, 1).Equals("!"))
+                {
+                    string command = message[0].Substring(1, message[0].Length - 1);
 
+                    String temp;
+
+                        switch (command)
+                        {
+                            case "hi":
+                                SendMessage(callback.Sender, "Hi " + steamFriends.GetFriendPersonaName(callback.Sender));
+                                break;
+                            case "name":
+                                temp = String.Join(" ", message);
+                                temp = temp.Substring(command.Length + 2);
+
+                                steamFriends.SetPersonaName(temp);
+                                SendMessage(callback.Sender, "Username changed to " + temp);
+                                break;
+                            case "admins":
+                                for (int i = 0; i < admins.Length; i++){
+                                    SendMessage(callback.Sender, admins[i]);
+                                
+                                }
+                                break;
+
+                            default:
+                                SendMessage(callback.Sender, "Command not recognized.");
+                                break;
+                        }
+                }             
             }
-
-
-
         }
+
+        public static void SendMessage(SteamID id, string message) {
+            steamFriends.SendChatMessage(id , EChatEntryType.ChatMsg, message);
+            Console.WriteLine(steamFriends.GetPersonaName() + ": " + message);
+        
+        }
+
 
     }
 }
