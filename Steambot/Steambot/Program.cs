@@ -7,6 +7,8 @@ using SteamKit2;
 using System.IO;
 using System.Security.Cryptography;
 using System.Threading;
+using System.Web;
+using System.Net;
 
 namespace Steambot
 {
@@ -33,8 +35,26 @@ namespace Steambot
 
             user = Console.ReadLine();
 
+            ConsoleKeyInfo key;
+
             Console.Write("Enter steam password: ");
-            pass = Console.ReadLine();
+
+            do {
+                key = Console.ReadKey(true);
+
+                if (key.Key != ConsoleKey.Backspace && key.Key != ConsoleKey.Enter) {
+                    pass += key.KeyChar;
+                    Console.Write("*");
+                } else {
+                    if (key.Key == ConsoleKey.Backspace && pass.Length > 0) {
+                        pass = pass.Substring(0, (pass.Length - 1));
+                        Console.Write("\b \b");
+                    }
+                }
+
+            } while (key.Key != ConsoleKey.Enter);
+
+            Console.WriteLine("");
 
             loginSteam();
         }
@@ -307,8 +327,7 @@ namespace Steambot
 
                                         if (File.ReadAllText("admins.txt").Contains(admin)) {
                                             string[] tempText = File.ReadAllText("admins.txt").Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
-                                            List<string> tempList = new List<string>();
-                                            int c = 0;                                         
+                                            List<string> tempList = new List<string>();                                       
                                             for (int i = 0; i < tempText.Length; i++) {
                                                 if (!tempText[i].ToLower().Equals(admin.ToLower())) {
                                                     tempList.Add(tempText[i]);
@@ -331,6 +350,31 @@ namespace Steambot
 
                             break;
 
+                        case "addlink":
+                            if (message.Length > 1) {
+                                if (Uri.IsWellFormedUriString(message[1], UriKind.RelativeOrAbsolute)) {
+                                    if (!File.Exists("links.txt")) {
+                                        File.AppendAllText("links.txt", message[1]);
+                                        SendMessage(callback.Sender, message[1] + " added to random links.");
+                                    } else {
+                                        File.AppendAllText("links.txt", Environment.NewLine + message[1]);
+                                        SendMessage(callback.Sender, message[1] + " added to random links.");
+                                    }
+                                    
+                                }
+
+                            } else {
+                                SendMessage(callback.Sender, "Usage !addlink url");
+                            }
+                            break;
+
+                        case "randomlink":
+                            Random rand = new Random();
+                            string[] urls = File.ReadAllLines("links.txt");
+                            int index = rand.Next(urls.Length);
+                            SendMessage(callback.Sender, urls[index]);
+                            break;
+
                         default:
                             SendMessage(callback.Sender, "Command not recognized.");
                             break;
@@ -343,10 +387,6 @@ namespace Steambot
             steamFriends.SendChatMessage(id , EChatEntryType.ChatMsg, message);
             Console.WriteLine(steamFriends.GetPersonaName() + ": " + message);
         
-        }
-
-        static void reloadTextfiles() {
-            
         }
 
     }

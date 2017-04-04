@@ -60,3 +60,13 @@ E:\Programming\Steambot\Steambot\Steambot\obj\Debug\Steambot.csproj.GenerateReso
 C:\Users\MaximilianAndersen\Documents\Programmering\PoppyBot\Steambot\Steambot\bin\Debug\Steambot.exe.config
 C:\Users\MaximilianAndersen\Documents\Programmering\PoppyBot\Steambot\Steambot\obj\Debug\Steambot.exe
 C:\Users\MaximilianAndersen\Documents\Programmering\PoppyBot\Steambot\Steambot\obj\Debug\Steambot.pdb
+C:\Users\MaximilianAndersen\Documents\Programmering\PoppyBot\Steambot\Steambot\bin\Debug\Steambot.exe
+C:\Users\MaximilianAndersen\Documents\Programmering\PoppyBot\Steambot\Steambot\bin\Debug\Steambot.pdb
+C:\Users\MaximilianAndersen\Documents\Programmering\PoppyBot\Steambot\Steambot\bin\Debug\protobuf-net.dll
+C:\Users\MaximilianAndersen\Documents\Programmering\PoppyBot\Steambot\Steambot\bin\Debug\SteamKit2.dll
+C:\Users\MaximilianAndersen\Documents\Programmering\PoppyBot\Steambot\Steambot\bin\Debug\protobuf-net.pdb
+C:\Users\MaximilianAndersen\Documents\Programmering\PoppyBot\Steambot\Steambot\bin\Debug\protobuf-net.xml
+C:\Users\MaximilianAndersen\Documents\Programmering\PoppyBot\Steambot\Steambot\bin\Debug\SteamKit2.xml
+C:\Users\MaximilianAndersen\Documents\Programmering\PoppyBot\Steambot\Steambot\obj\Debug\Steambot.csprojResolveAssemblyReference.cache
+C:\Users\MaximilianAndersen\Documents\Programmering\PoppyBot\Steambot\Steambot\obj\Debug\Steambot.Properties.Resources.resources
+C:\Users\MaximilianAndersen\Documents\Programmering\PoppyBot\Steambot\Steambot\obj\Debug\Steambot.csproj.GenerateResource.Cache
