@@ -15,8 +15,6 @@ namespace Steambot
         static string user, pass;
         static string authCode, twoFactorCode;
 
-        static StreamReader sr;
-
         static SteamClient steamClient;
         static CallbackManager manager;
 
@@ -29,12 +27,14 @@ namespace Steambot
 
         static void Main(string[] args)
         {
-            //Console.WriteLine("CTRL+D quits");
+            Console.WriteLine("CTRL+D quits");
 
+            Console.Write("Enter steam username: ");
 
-            user = "poppiesbot";
+            user = Console.ReadLine();
 
-            pass = "brorerik99";
+            Console.Write("Enter steam password: ");
+            pass = Console.ReadLine();
 
             loginSteam();
         }
@@ -44,8 +44,6 @@ namespace Steambot
             steamClient = new SteamClient();
 
             manager = new CallbackManager(steamClient);
-
-            admins = Properties.Resources.admins.Split();
 
             steamUser = steamClient.GetHandler<SteamUser>();
 
@@ -230,21 +228,23 @@ namespace Steambot
 
         }
 
-        static void OnMessageReceived(SteamFriends.FriendMsgCallback callback)
-        {
-            bool isAdmin;
-
-            for (int i = 0; i < admins.Length; i++) {
-                if (admins[i] == callback.Sender.ToString()) {
-                    Console.WriteLine("Admin");
-                }
-            }
-
-            Console.WriteLine(steamFriends.GetFriendPersonaName(callback.Sender)+ "," + callback.Sender + ": " + callback.Message);
+        static void OnMessageReceived(SteamFriends.FriendMsgCallback callback){
+         
             if (callback.Message.Length > 1) {
-                String[] message = callback.Message.Split();
 
-                
+                bool isAdmin = false;
+                bool isOwner = false;
+
+                if (File.ReadAllText("admins.txt").Contains(callback.Sender.ToString())) {
+                    isAdmin = true;
+                }
+
+                if (File.ReadAllText("owners.txt").Contains(callback.Sender.ToString())) {
+                    isOwner = true;
+                }
+
+                Console.WriteLine(steamFriends.GetFriendPersonaName(callback.Sender) + ":" + callback.Sender + ": " + callback.Message);
+                String[] message = callback.Message.Split();
 
                 if (message[0].Substring(0, 1).Equals("!"))
                 {
@@ -252,39 +252,102 @@ namespace Steambot
 
                     String temp;
 
-                        switch (command)
-                        {
-                            case "hi":
-                                SendMessage(callback.Sender, "Hi " + steamFriends.GetFriendPersonaName(callback.Sender));
-                                break;
-                            case "name":
+                    switch (command)
+                    {
+                        case "hi":
+                            SendMessage(callback.Sender, "Hi " + steamFriends.GetFriendPersonaName(callback.Sender));
+                            break;
+                        case "name":
+                            if (isOwner) {
                                 temp = String.Join(" ", message);
                                 temp = temp.Substring(command.Length + 2);
 
                                 steamFriends.SetPersonaName(temp);
                                 SendMessage(callback.Sender, "Username changed to " + temp);
-                                break;
-                            case "admins":
-                                for (int i = 0; i < admins.Length; i++){
-                                    SendMessage(callback.Sender, admins[i]);
-                                
-                                }
-                                break;
+                            }
 
-                            default:
-                                SendMessage(callback.Sender, "Command not recognized.");
-                                break;
-                        }
+                            break;
+                        case "admins":
+                            foreach (string s in File.ReadAllText("admins.txt").Split(new string[] { Environment.NewLine }, StringSplitOptions.None)) {
+                                SendMessage(callback.Sender, steamFriends.GetFriendPersonaName(new SteamID(s)));
+                            }
+                                
+
+                            break;
+
+                        case "addadmin":
+                            if (isOwner) {
+                                if (message.Length > 1)
+                                {
+                                    string admin = message[1];
+                                    if (admin.StartsWith("STEAM_"))
+                                    {
+                                        File.AppendAllText("admins.txt", Environment.NewLine + admin);
+                                        SendMessage(callback.Sender, steamFriends.GetFriendPersonaName(new SteamID(admin)) + " is now admin");
+
+                                    }
+                                    else {
+                                        SendMessage(callback.Sender, "Wrong SteamID, use https://steamid.io/lookup to get SteamID ");
+                                    }
+                                } else {
+                                    SendMessage(callback.Sender, "Usage !addadmin SteamID");
+                                }
+
+                            }
+                            else {
+                                SendMessage(callback.Sender, "You're not an admin");
+                            }
+                            break;
+
+                        case "removeadmin":
+                            if (isOwner) {
+                                if (message.Length > 1) {
+                                    string admin = message[1];
+                                    if (admin.StartsWith("STEAM_")) {
+
+                                        if (File.ReadAllText("admins.txt").Contains(admin)) {
+                                            string[] tempText = File.ReadAllText("admins.txt").Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                                            List<string> tempList = new List<string>();
+                                            int c = 0;                                         
+                                            for (int i = 0; i < tempText.Length; i++) {
+                                                if (!tempText[i].ToLower().Equals(admin.ToLower())) {
+                                                    tempList.Add(tempText[i]);
+                                                }
+                                                                                                   
+                                            }
+                                            File.WriteAllText("admins.txt", String.Join(Environment.NewLine, tempList));
+                                            SendMessage(callback.Sender, steamFriends.GetFriendPersonaName(new SteamID(admin)) + " has no powers anymore");
+                                        }
+
+                                    } else {
+                                        SendMessage(callback.Sender, "Wrong SteamID, use https://steamid.io/lookup to get SteamID ");
+                                    }
+
+                                } else {
+                                    SendMessage(callback.Sender, "Usage !addadmin SteamID");
+                                }
+
+                            }
+
+                            break;
+
+                        default:
+                            SendMessage(callback.Sender, "Command not recognized.");
+                            break;
+                    }
                 }             
             }
         }
 
-        public static void SendMessage(SteamID id, string message) {
+        static void SendMessage(SteamID id, string message) {
             steamFriends.SendChatMessage(id , EChatEntryType.ChatMsg, message);
             Console.WriteLine(steamFriends.GetPersonaName() + ": " + message);
         
         }
 
+        static void reloadTextfiles() {
+            
+        }
 
     }
 }
