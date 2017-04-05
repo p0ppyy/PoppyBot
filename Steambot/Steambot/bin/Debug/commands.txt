@@ -1,0 +1,11 @@
+!hi - says hi + your steam name
+!admins - lists current admins
+!randomlink - returns a user added link
+!addlink - lets you add a link to !randomlink
+!slap - slaps the input *slaps input*
+------Admin---------
+!name - lets you set the name of the bot
+------Owner---------
+!addadmin - lets you add a new admin
+!removeadmin - lets you remove a admin
+ 

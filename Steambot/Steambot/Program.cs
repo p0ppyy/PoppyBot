@@ -83,6 +83,9 @@ namespace Steambot
             manager.Subscribe<SteamFriends.FriendAddedCallback>(onFriendAdded);
             manager.Subscribe<SteamFriends.FriendMsgCallback>(OnMessageReceived);
 
+            manager.Subscribe<SteamFriends.ChatInviteCallback>(OnChatInvite);
+            manager.Subscribe<SteamFriends.ChatMsgCallback>(OnChatMessage);
+
             steamClient.Connect();
 
             isRunning = true;
@@ -171,7 +174,7 @@ namespace Steambot
 
         static void onPersonaState(SteamFriends.PersonaStateCallback callback) {
 
-            Console.WriteLine(callback.Name + " is now " + callback.State);
+            Console.WriteLine(callback.Name + ": " + callback.JobID);
 
         }
 
@@ -184,7 +187,6 @@ namespace Steambot
             steamFriends.SetPersonaState(EPersonaState.Online);
             Console.WriteLine("State: {0}", steamFriends.GetPersonaState());
         }
-
 
         static void onFriendList(SteamFriends.FriendsListCallback callback) {
 
@@ -206,7 +208,6 @@ namespace Steambot
             Console.WriteLine("{0} was added as a friend", callback.PersonaName);
 
         }
-
 
         static void onMachineAuth(SteamUser.UpdateMachineAuthCallback callback) {
             Console.WriteLine("Updating sentryfile...");
@@ -275,7 +276,7 @@ namespace Steambot
                     switch (command)
                     {
                         case "hi":
-                            SendMessage(callback.Sender, "Hi " + steamFriends.GetFriendPersonaName(callback.Sender));
+                            SendFriendMessage(callback.Sender, "Hi " + steamFriends.GetFriendPersonaName(callback.Sender));
                             break;
                         case "name":
                             if (isOwner) {
@@ -283,13 +284,13 @@ namespace Steambot
                                 temp = temp.Substring(command.Length + 2);
 
                                 steamFriends.SetPersonaName(temp);
-                                SendMessage(callback.Sender, "Username changed to " + temp);
+                                SendFriendMessage(callback.Sender, "Username changed to " + temp);
                             }
 
                             break;
                         case "admins":
                             foreach (string s in File.ReadAllText("admins.txt").Split(new string[] { Environment.NewLine }, StringSplitOptions.None)) {
-                                SendMessage(callback.Sender, steamFriends.GetFriendPersonaName(new SteamID(s)));
+                                SendFriendMessage(callback.Sender, steamFriends.GetFriendPersonaName(new SteamID(s)));
                             }
                                 
 
@@ -303,19 +304,19 @@ namespace Steambot
                                     if (admin.StartsWith("STEAM_"))
                                     {
                                         File.AppendAllText("admins.txt", Environment.NewLine + admin);
-                                        SendMessage(callback.Sender, steamFriends.GetFriendPersonaName(new SteamID(admin)) + " is now admin");
+                                        SendFriendMessage(callback.Sender, steamFriends.GetFriendPersonaName(new SteamID(admin)) + " is now admin");
 
                                     }
                                     else {
-                                        SendMessage(callback.Sender, "Wrong SteamID, use https://steamid.io/lookup to get SteamID ");
+                                        SendFriendMessage(callback.Sender, "Wrong SteamID, use https://steamid.io/lookup to get SteamID ");
                                     }
                                 } else {
-                                    SendMessage(callback.Sender, "Usage !addadmin SteamID");
+                                    SendFriendMessage(callback.Sender, "Usage !addadmin SteamID");
                                 }
 
                             }
                             else {
-                                SendMessage(callback.Sender, "You're not an admin");
+                                SendFriendMessage(callback.Sender, "You're not an admin");
                             }
                             break;
 
@@ -335,15 +336,15 @@ namespace Steambot
                                                                                                    
                                             }
                                             File.WriteAllText("admins.txt", String.Join(Environment.NewLine, tempList));
-                                            SendMessage(callback.Sender, steamFriends.GetFriendPersonaName(new SteamID(admin)) + " has no powers anymore");
+                                            SendFriendMessage(callback.Sender, steamFriends.GetFriendPersonaName(new SteamID(admin)) + " has no powers anymore");
                                         }
 
                                     } else {
-                                        SendMessage(callback.Sender, "Wrong SteamID, use https://steamid.io/lookup to get SteamID ");
+                                        SendFriendMessage(callback.Sender, "Wrong SteamID, use https://steamid.io/lookup to get SteamID ");
                                     }
 
                                 } else {
-                                    SendMessage(callback.Sender, "Usage !addadmin SteamID");
+                                    SendFriendMessage(callback.Sender, "Usage !addadmin SteamID");
                                 }
 
                             }
@@ -355,16 +356,16 @@ namespace Steambot
                                 if (Uri.IsWellFormedUriString(message[1], UriKind.RelativeOrAbsolute)) {
                                     if (!File.Exists("links.txt")) {
                                         File.AppendAllText("links.txt", message[1]);
-                                        SendMessage(callback.Sender, message[1] + " added to random links.");
+                                        SendFriendMessage(callback.Sender, message[1] + " added to random links.");
                                     } else {
                                         File.AppendAllText("links.txt", Environment.NewLine + message[1]);
-                                        SendMessage(callback.Sender, message[1] + " added to random links.");
+                                        SendFriendMessage(callback.Sender, message[1] + " added to random links.");
                                     }
                                     
                                 }
 
                             } else {
-                                SendMessage(callback.Sender, "Usage !addlink url");
+                                SendFriendMessage(callback.Sender, "Usage !addlink url");
                             }
                             break;
 
@@ -372,21 +373,179 @@ namespace Steambot
                             Random rand = new Random();
                             string[] urls = File.ReadAllLines("links.txt");
                             int index = rand.Next(urls.Length);
-                            SendMessage(callback.Sender, urls[index]);
+                            SendFriendMessage(callback.Sender, urls[index]);
                             break;
 
+                        case "help": case "h": case "bot":
+                            SendFriendMessage(callback.Sender, Environment.NewLine + File.ReadAllText("commands.txt"));
+                            break;
+
+                        case "slap":
+                            SendFriendMessage(callback.Sender, "*slaps " + message[1] + "*");
+                            break;
+                        
                         default:
-                            SendMessage(callback.Sender, "Command not recognized.");
+                            SendFriendMessage(callback.Sender, "Command not recognized.");
                             break;
                     }
                 }             
             }
         }
 
-        static void SendMessage(SteamID id, string message) {
+        static void OnChatInvite(SteamFriends.ChatInviteCallback callback) {
+
+            steamFriends.JoinChat(callback.ChatRoomID);
+
+        }
+
+        static void OnChatMessage(SteamFriends.ChatMsgCallback callback) {
+            if (callback.Message.Length > 1) {
+
+                bool isAdmin = false;
+                bool isOwner = false;
+
+                if (File.ReadAllText("admins.txt").Contains(callback.ChatterID.ToString())) {
+                    isAdmin = true;
+                }
+
+                if (File.ReadAllText("owners.txt").Contains(callback.ChatterID.ToString())) {
+                    isOwner = true;
+                }
+
+                Console.WriteLine(steamFriends.GetFriendPersonaName(callback.ChatterID) + ":" + callback.ChatterID + ": " + callback.Message);
+                String[] message = callback.Message.Split();
+
+                if (message[0].Substring(0, 1).Equals("!")) {
+                    string command = message[0].Substring(1, message[0].Length - 1);
+
+                    String temp;
+
+                    switch (command) {
+                        case "hi":
+                            SendChatMessage(callback.ChatterID, "Hi " + steamFriends.GetFriendPersonaName(callback.ChatterID));
+                            break;
+                        case "name":
+                            if (isOwner) {
+                                temp = String.Join(" ", message);
+                                temp = temp.Substring(command.Length + 2);
+
+                                steamFriends.SetPersonaName(temp);
+                                SendChatMessage(callback.ChatRoomID, "Username changed to " + temp);
+                            }
+
+                            break;
+                        case "admins":
+                            foreach (string s in File.ReadAllText("admins.txt").Split(new string[] { Environment.NewLine }, StringSplitOptions.None)) {
+                                SendChatMessage(callback.ChatRoomID, steamFriends.GetFriendPersonaName(new SteamID(s)));
+                            }
+
+
+                            break;
+
+                        case "addadmin":
+                            if (isOwner) {
+                                if (message.Length > 1) {
+                                    string admin = message[1];
+                                    if (admin.StartsWith("STEAM_")) {
+                                        File.AppendAllText("admins.txt", Environment.NewLine + admin);
+                                        SendChatMessage(callback.ChatRoomID, steamFriends.GetFriendPersonaName(new SteamID(admin)) + " is now admin");
+
+                                    } else {
+                                        SendChatMessage(callback.ChatRoomID, "Wrong SteamID, use https://steamid.io/lookup to get SteamID ");
+                                    }
+                                } else {
+                                    SendChatMessage(callback.ChatRoomID, "Usage !addadmin SteamID");
+                                }
+
+                            } else {
+                                SendChatMessage(callback.ChatRoomID, "You're not an admin");
+                            }
+                            break;
+
+                        case "removeadmin":
+                            if (isOwner) {
+                                if (message.Length > 1) {
+                                    string admin = message[1];
+                                    if (admin.StartsWith("STEAM_")) {
+
+                                        if (File.ReadAllText("admins.txt").Contains(admin)) {
+                                            string[] tempText = File.ReadAllText("admins.txt").Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                                            List<string> tempList = new List<string>();
+                                            for (int i = 0; i < tempText.Length; i++) {
+                                                if (!tempText[i].ToLower().Equals(admin.ToLower())) {
+                                                    tempList.Add(tempText[i]);
+                                                }
+
+                                            }
+                                            File.WriteAllText("admins.txt", String.Join(Environment.NewLine, tempList));
+                                            SendChatMessage(callback.ChatRoomID, steamFriends.GetFriendPersonaName(new SteamID(admin)) + " has no powers anymore");
+                                        }
+
+                                    } else {
+                                        SendChatMessage(callback.ChatRoomID, "Wrong SteamID, use https://steamid.io/lookup to get SteamID ");
+                                    }
+
+                                } else {
+                                    SendChatMessage(callback.ChatRoomID, "Usage !addadmin SteamID");
+                                }
+
+                            }
+
+                            break;
+
+                        case "addlink":
+                            if (message.Length > 1) {
+                                if (Uri.IsWellFormedUriString(message[1], UriKind.RelativeOrAbsolute)) {
+                                    if (!File.Exists("links.txt")) {
+                                        File.AppendAllText("links.txt", message[1]);
+                                        SendChatMessage(callback.ChatRoomID, message[1] + " added to random links.");
+                                    } else {
+                                        File.AppendAllText("links.txt", Environment.NewLine + message[1]);
+                                        SendChatMessage(callback.ChatRoomID, message[1] + " added to random links.");
+                                    }
+
+                                }
+
+                            } else {
+                                SendChatMessage(callback.ChatRoomID, "Usage !addlink url");
+                            }
+                            break;
+
+                        case "randomlink":
+                            Random rand = new Random();
+                            string[] urls = File.ReadAllLines("links.txt");
+                            int index = rand.Next(urls.Length);
+                            SendChatMessage(callback.ChatRoomID, urls[index]);
+                            break;
+
+                        case "help":
+                        case "h":
+                        case "bot":
+                            SendChatMessage(callback.ChatRoomID, Environment.NewLine + File.ReadAllText("commands.txt"));
+                            break;
+
+                        case "slap":
+                            SendChatMessage(callback.ChatRoomID, "*slaps " + message[1] + "*");
+                            break;
+                        case "leave":
+                            steamFriends.LeaveChat(callback.ChatRoomID);
+                            break;
+
+                        default:
+                            SendChatMessage(callback.ChatRoomID, "Command not recognized.");
+                            break;
+                    }
+                }
+            }
+        }
+
+        static void SendFriendMessage(SteamID id, string message) {
             steamFriends.SendChatMessage(id , EChatEntryType.ChatMsg, message);
-            Console.WriteLine(steamFriends.GetPersonaName() + ": " + message);
         
+        }
+
+        static void SendChatMessage(SteamID chatID, string message) {
+            steamFriends.SendChatRoomMessage(chatID, EChatEntryType.ChatMsg, message);
         }
 
     }
